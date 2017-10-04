@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">StationFinder</string>
+    <string name="title_menu_main_reload">Aktualisieren</string>
+    <string name="oeff_station_json_url">https://data.wien.gv.at/daten/geo?service=WFS&amp;request=GetFeature&amp;version=1.1.0&amp;typeName=ogdwien:OEFFHALTESTOGD&amp;srsName=EPSG:4326&amp;outputFormat=json</string>
+    <!-- TEST URL
+    <string name="oeff_station_json_url">http://10.0.0.4:80/OEFFHALTESTOGD.json</string>
+    -->
+    
+    <string name="settings_output_visible_key" translatable="false">output_visible</string>
+    <stings name="settings_output_visible_summary_on">It is on.</stings>
+    <string name="settings_output_visible_summary_off">Oh no its of</string>
+    <string name="settings_"
+</resources>
