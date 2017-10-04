@@ -61,7 +61,14 @@ public class StationParser {
             station.setLocation(new PointF((float)jsonCoordinates.getDouble(0), (float)jsonCoordinates.getDouble(1)));
             station.setLines(lineList);
 
-            stationList.add(station);
+            boolean hasUorS = false;
+
+            for (String s : lineList
+                 ) {
+                hasUorS = s.startsWith("U") || s.startsWith("S");
+            }
+
+            if(hasUorS) stationList.add(station);
         }
 
         return stationList;
