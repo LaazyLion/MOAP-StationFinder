@@ -22,7 +22,9 @@
         <activity android:name=".StationDetailsActivity" />
         <activity android:name=".SettingsActivity"
             android:parentActivityName=".MainActivity">
-            <meta_data android:name ="andr"
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
     </application>
 
