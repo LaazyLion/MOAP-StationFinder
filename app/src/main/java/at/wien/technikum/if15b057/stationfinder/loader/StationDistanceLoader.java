@@ -2,42 +2,41 @@ package at.wien.technikum.if15b057.stationfinder.loader;
 
 import android.content.Context;
 import android.graphics.PointF;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import at.wien.technikum.if15b057.stationfinder.data.Station;
-import at.wien.technikum.if15b057.stationfinder.data.StationParser;
 
 /**
  * Created by matthias on 26.09.17.
  */
 
-public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
+public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
 
-    private static final String LOG_TAG = StationListWebLoader.class.getName();
-    private URL url;
-    private HttpURLConnection connection;
+    private static final String LOG_TAG = StationDistanceLoader.class.getName();
+    private Location location;
+    private ArrayList<Station> stations;
 
 
     // constructor
 
-    public StationListWebLoader(Context context, Bundle args) {
+    public StationDistanceLoader(Context context, Bundle args) {
         super(context);
+        location = args.getParcelable("location");
+    }
 
-        try {
-            url = new URL(args.getString("url"));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+
+    // setter
+
+    public void setStations(ArrayList<Station> stations) {
+        this.stations = stations;
     }
 
 
@@ -54,24 +53,29 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
 
         Log.v(LOG_TAG, "Started loading...");
 
-        ArrayList<Station> stationList = new ArrayList<>();
+        if(stations == null) return null;
 
-        try {
-            connection = (HttpURLConnection) url.openConnection();
-            stationList = StationParser.fromStream(connection.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            stationList = new ArrayList<>();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } finally {
-            if(connection != null)
-                connection.disconnect();
+        for (Station s : stations
+             ) {
+            Location temp = new Location(LocationManager.GPS_PROVIDER);
+            temp.setLatitude(s.getLocation().y);
+            temp.setLongitude(s.getLocation().x);
+            s.setDistance((int) location.distanceTo(temp));
         }
+
+        // api 24 required
+        // stations.sort(Comparator.comparing(Station::getDistance));
+
+        Collections.sort(stations, new Comparator<Station>() {
+            @Override
+            public int compare(Station s1, Station s2) {
+                return (s1.getDistance() - s2.getDistance());
+            }
+        });
 
         Log.v(LOG_TAG, "Loading done!");
 
-        return stationList;
+        return stations;
     }
 
 

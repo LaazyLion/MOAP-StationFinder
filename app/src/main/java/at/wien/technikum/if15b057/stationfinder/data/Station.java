@@ -14,6 +14,7 @@ public class Station implements Parcelable {
 
     private String name;
     private PointF location;
+    private int distance;
     private ArrayList<String> lines;
 
 
@@ -22,12 +23,14 @@ public class Station implements Parcelable {
     public Station() {
         name = "";
         location = new PointF(0, 0);
+        distance = 0;
         lines = new ArrayList<>();
     }
 
     protected Station(Parcel in) {
         name = in.readString();
         location = in.readParcelable(PointF.class.getClassLoader());
+        distance = in.readInt();
         lines = in.createStringArrayList();
     }
 
@@ -39,6 +42,10 @@ public class Station implements Parcelable {
 
     public PointF getLocation() {
         return location;
+    }
+
+    public int getDistance() {
+        return distance;
     }
 
     public ArrayList<String> getLines() {
@@ -71,6 +78,10 @@ public class Station implements Parcelable {
         this.location = location;
     }
 
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
     public void setLines(ArrayList<String> lines) {
         this.lines = lines;
     }
@@ -87,6 +98,7 @@ public class Station implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeParcelable(location, flags);
+        dest.writeInt(distance);
         dest.writeStringList(lines);
     }
 

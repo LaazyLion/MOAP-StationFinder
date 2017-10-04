@@ -1,12 +1,20 @@
 package at.wien.technikum.if15b057.stationfinder;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,18 +23,24 @@ import java.util.ArrayList;
 
 import at.wien.technikum.if15b057.stationfinder.adapter.RvStationListAdapter;
 import at.wien.technikum.if15b057.stationfinder.data.Station;
+import at.wien.technikum.if15b057.stationfinder.loader.StationDistanceLoader;
 import at.wien.technikum.if15b057.stationfinder.loader.StationListWebLoader;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<ArrayList<Station>> {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<ArrayList<Station>>, LocationListener {
 
     private static final String LOG_TAG = MainActivity.class.getName();
-    private static final int LOADER_ID = 1;
+    private static final int STATION_LOADER_ID = 1;
+    private static final int STATION_DISTANCE_LOADER_ID = 2;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0;
+
 
     private String url;
 
     private RecyclerView rvStationList;
     private RvStationListAdapter stationListAdapter;
     private LinearLayoutManager linearLayoutManager;
+
+    private LocationManager locationManager;
 
     // data
     private ArrayList<Station> stationList;
@@ -35,6 +49,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.v(LOG_TAG, "Creating Activity...");
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         // get url
         url = getString(R.string.oeff_station_json_url);
@@ -52,7 +70,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // bind loader
         Bundle args = new Bundle();
         args.putString("url", url);
-        getSupportLoaderManager().initLoader(LOADER_ID, args, this);
+        getSupportLoaderManager().initLoader(STATION_LOADER_ID, args, this);
+
+        requestLocationUpdates();
     }
 
     @Override
@@ -65,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intent.putExtras(bundle);
         startActivity(intent);
     }
+
 
     // menu
 
@@ -79,16 +100,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int itemId = item.getItemId();
 
         if (itemId == R.id.menu_main_action_reload) {
+            stationListAdapter.setContent(null);
+
             LoaderManager loaderManager = getSupportLoaderManager();
-            Loader<String> loader = loaderManager.getLoader(LOADER_ID);
+            Loader<String> loader = loaderManager.getLoader(STATION_LOADER_ID);
             Bundle args = new Bundle();
 
             args.putString("url", url);
 
             if (loader == null)
-                loaderManager.initLoader(LOADER_ID, args, this);
+                loaderManager.initLoader(STATION_LOADER_ID, args, this);
             else
-                loaderManager.restartLoader(LOADER_ID, args, this);
+                loaderManager.restartLoader(STATION_LOADER_ID, args, this);
             return true;
         }
 
@@ -96,21 +119,156 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    // location
+
+    private void requestLocationUpdates() {
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    1000,
+                    0, this);
+        }
+    }
+
+
+    // location listener
+
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.v(LOG_TAG, "Location changed: " + location.toString());
+
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> loader = loaderManager.getLoader(STATION_DISTANCE_LOADER_ID);
+        Bundle args = new Bundle();
+
+        args.putParcelable("location", location);
+
+        if (loader == null)
+            loaderManager.initLoader(STATION_DISTANCE_LOADER_ID, args, this);
+        else
+            loaderManager.restartLoader(STATION_DISTANCE_LOADER_ID, args, this);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+
     // loader
 
     @Override
     public Loader<ArrayList<Station>> onCreateLoader(int id, Bundle args) {
-        return new StationListWebLoader(this, args);
+        Log.v(LOG_TAG, "Loader created: " + id);
+
+        if(id == STATION_LOADER_ID)
+            return new StationListWebLoader(this, args);
+        else if(id == STATION_DISTANCE_LOADER_ID) {
+            StationDistanceLoader stationDistanceLoader = new StationDistanceLoader(this, args);
+            stationDistanceLoader.setStations(stationList);
+            return stationDistanceLoader;
+        }
+
+        return null;
     }
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Station>> loader, ArrayList<Station> data) {
-        stationList = data;
-        stationListAdapter.setContent(stationList);
+
+        if(data != null) stationList = data;
+
+        switch (loader.getId()) {
+
+            case STATION_LOADER_ID:
+                break;
+
+            case STATION_DISTANCE_LOADER_ID:
+                stationListAdapter.setContent(stationList);
+                break;
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<ArrayList<Station>> loader) {
+    }
 
+
+    // permission request
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    requestLocationUpdates();
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+
+    // activity lifecycle
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        requestLocationUpdates();
     }
 }

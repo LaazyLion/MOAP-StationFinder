@@ -2,7 +2,6 @@ package at.wien.technikum.if15b057.stationfinder.data;
 
 import android.graphics.PointF;
 import android.util.JsonReader;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,8 +74,6 @@ public class StationParser {
         jsonReader.beginObject();
 
         while (jsonReader.hasNext()) {
-            Log.v(LOG_TAG, jsonReader.peek().toString());
-
             switch (jsonReader.peek()) {
                 case BEGIN_ARRAY:
                     jsonObject.put(name, readJsonArray(jsonReader));
@@ -117,7 +114,6 @@ public class StationParser {
         jsonReader.beginArray();
 
         while (jsonReader.hasNext()) {
-            Log.v(LOG_TAG, jsonReader.peek().toString());
 
             switch (jsonReader.peek()) {
                 case BEGIN_ARRAY:
