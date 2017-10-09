@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -49,6 +50,10 @@ public class RvStationListAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ((ViewHolder)holder).tvName.setText(content.get(position).getName());
+        int distance = content.get(position).getDistance();
+        String unit = distance > 1000 ? "km" : "m";
+        String text = String.valueOf(distance > 1000 ? distance / 1000 : distance) + " " + unit;
+        ((ViewHolder)holder).tvDistance.setText(text);
     }
 
     @Override
@@ -64,11 +69,15 @@ public class RvStationListAdapter extends RecyclerView.Adapter {
 
     private class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView tvName;
+        TextView tvName;
+        TextView tvDistance;
+        ImageView ivIcon;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             tvName = (TextView) itemView.findViewById(R.id.content_station_list_tv_name);
+            tvDistance = (TextView) itemView.findViewById(R.id.content_station_list_tv_distance);
+            ivIcon = (ImageView) itemView.findViewById(R.id.content_station_list_iv_icon);
         }
     }
 }

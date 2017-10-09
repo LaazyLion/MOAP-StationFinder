@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private RecyclerView rvStationList;
     private RvStationListAdapter stationListAdapter;
     private LinearLayoutManager linearLayoutManager;
+    private ProgressBar pbLoading;
 
     private LocationManager locationManager;
 
@@ -66,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         rvStationList.setAdapter(stationListAdapter);
         rvStationList.setLayoutManager(linearLayoutManager);
+
+        // setup other views
+        pbLoading = (ProgressBar) findViewById(R.id.activity_main_pb_loading);
 
         // bind loader
         Bundle args = new Bundle();
@@ -108,10 +113,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             args.putString("url", url);
 
+            pbLoading.setVisibility(View.VISIBLE);
+
             if (loader == null)
                 loaderManager.initLoader(STATION_LOADER_ID, args, this);
             else
                 loaderManager.restartLoader(STATION_LOADER_ID, args, this);
+
             return true;
         }
 
@@ -142,16 +150,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_FINE_LOCATION);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
         } else {
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     1000,
                     0, this);
+
+            if(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
+                onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
         }
     }
 
@@ -160,18 +167,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.v(LOG_TAG, "Location changed: " + location.toString());
-
         LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<String> loader = loaderManager.getLoader(STATION_DISTANCE_LOADER_ID);
+        Loader<String> loader;
         Bundle args = new Bundle();
 
-        args.putParcelable("location", location);
+        Log.v(LOG_TAG, "Location changed: " + location.toString());
 
-        if (loader == null)
-            loaderManager.initLoader(STATION_DISTANCE_LOADER_ID, args, this);
-        else
-            loaderManager.restartLoader(STATION_DISTANCE_LOADER_ID, args, this);
+        if (stationList != null) {
+
+            loader = loaderManager.getLoader(STATION_DISTANCE_LOADER_ID);
+            args.putParcelable("location", location);
+
+            pbLoading.setVisibility(View.VISIBLE);
+
+            if (loader == null)
+                loaderManager.initLoader(STATION_DISTANCE_LOADER_ID, args, this);
+            else
+                loaderManager.restartLoader(STATION_DISTANCE_LOADER_ID, args, this);
+        }
     }
 
     @Override
@@ -210,15 +223,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onLoadFinished(Loader<ArrayList<Station>> loader, ArrayList<Station> data) {
 
-        if(data != null) stationList = data;
-
         switch (loader.getId()) {
 
             case STATION_LOADER_ID:
+                if(data != null) stationList = data;
+                stationListAdapter.setContent(data);
+                pbLoading.setVisibility(View.GONE);
                 break;
 
             case STATION_DISTANCE_LOADER_ID:
+                if(data != null) stationList = data;
                 stationListAdapter.setContent(stationList);
+                pbLoading.setVisibility(View.GONE);
                 break;
         }
     }
@@ -235,13 +251,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     requestLocationUpdates();
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
 
                 } else {
 
@@ -250,15 +262,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
 
     // activity lifecycle
-
 
     @Override
     protected void onPause() {

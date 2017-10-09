@@ -4,4 +4,5 @@
     <dimen name="text_size_medium">25dp</dimen>
     <dimen name="text_size_small">10dp</dimen>
     <dimen name="text_size_list">26dp</dimen>
+    <dimen name="margin_list_elements">10dp</dimen>
 </resources>
