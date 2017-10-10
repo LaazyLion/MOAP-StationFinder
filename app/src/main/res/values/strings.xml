@@ -3,6 +3,11 @@
     <string name="title_menu_main_reload">Aktualisieren</string>
     <string name="title_menu_main_open_settins">Einstellungen</string>
 
+    <string name="label_location">Standort</string>
+    <string name="label_my_loction">Mein Standort</string>
+    <string name="label_distance">Entfernung</string>
+    <string name="label_lines">Linien</string>
+
     <!--
     <string name="oeff_station_json_url">https://data.wien.gv.at/daten/geo?service=WFS&amp;request=GetFeature&amp;version=1.1.0&amp;typeName=ogdwien:OEFFHALTESTOGD&amp;srsName=EPSG:4326&amp;outputFormat=json</string>
     -->

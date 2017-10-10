@@ -22,12 +22,14 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
     private final String LOG_TAG = StationDetailsActivity.class.getName();
 
     private Station station;
-    private TextView tvName;
     private TextView tvLocation;
     private TextView tvLines;
-    private TextView tvMyLocation;
+    private TextView tvDistance;
 
     private LocationManager locationManager;
+
+
+    // activity lifecycle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +49,33 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
         }
 
         // get views
-        tvName = (TextView) findViewById(R.id.activity_station_details_tv_name);
         tvLocation = (TextView) findViewById(R.id.activity_station_details_tv_location);
         tvLines = (TextView) findViewById(R.id.activity_station_details_tv_lines);
-        tvMyLocation = (TextView) findViewById(R.id.activity_station_details_tv_myLocation);
+        tvDistance = (TextView) findViewById(R.id.activity_station_details_tv_myLocation);
 
         // set content
-        tvName.setText(station.getName());
+        setTitle(station.getName());
         tvLocation.setText(station.getLocation().toString());
         tvLines.setText(station.getLinesAsString());
-        tvMyLocation.setText(String.valueOf(station.getDistance()));
+        tvDistance.setText(String.valueOf(station.getDistance()));
 
-        //getLocation();
+        requestLocationUpdates();
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        requestLocationUpdates();
+    }
+
+
+    // menu
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -107,72 +123,69 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
 
             location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-            if(location != null)
-                tvMyLocation.setText(location.toString());
+            if (location != null)
+                tvDistance.setText(location.toString());
             else
-                tvMyLocation.setText("No Location available");
+                tvDistance.setText("No Location available");
         }
     }
 
 
-    // activity lifecycle
+    // location
 
+    private void requestLocationUpdates() {
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-        //getLocation();
-    }
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
 
-        //locationManager.removeUpdates(this);
-    }
+            } else {
 
+                // No explanation needed, we can request the permission.
 
-    // permission request
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getLocation();
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_FINE_LOCATION);
             }
+        } else {
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    1000,
+                    0, this);
 
-            // other 'case' lines to check for other
-            // permissions this app might request
+            if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
+                onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
         }
     }
-
 
     // location listener
 
     @Override
     public void onLocationChanged(Location location) {
-        if(location != null) {
+        if (location != null) {
             Log.v(LOG_TAG, "Location changed: " + location.toString());
-            tvMyLocation.setText(location.toString());
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            Location stationLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            stationLocation.setLatitude(station.getLocation().y);
+            stationLocation.setLongitude(station.getLocation().x);
+            float distance = stationLocation.distanceTo(location);
+            String unit = distance > 1000 ? "km" : "m";
+            distance = distance > 1000 ? distance / 1000 : distance;
+            tvDistance.setText(String.valueOf(distance) + " " + unit);
         }
         else {
             Log.v(LOG_TAG, "Location changed: NULL");
-            tvMyLocation.setText("No Location available");
+            tvDistance.setText("No Location available");
         }
     }
 
@@ -189,5 +202,27 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
     @Override
     public void onProviderDisabled(String provider) {
         Log.v(LOG_TAG, "Provider disabled: " + provider);
+    }
+
+
+    // permission request
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    requestLocationUpdates();
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
     }
 }
