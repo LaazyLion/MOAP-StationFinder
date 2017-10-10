@@ -51,7 +51,7 @@ public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
     @Override
     public ArrayList<Station> loadInBackground() {
 
-        Log.v(LOG_TAG, "Started loading...");
+        Log.v(LOG_TAG, "Started sorting...");
 
         if(stations == null) return null;
 
@@ -73,7 +73,7 @@ public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
             }
         });
 
-        Log.v(LOG_TAG, "Loading done!");
+        Log.v(LOG_TAG, "Sorting done!");
 
         return stations;
     }
