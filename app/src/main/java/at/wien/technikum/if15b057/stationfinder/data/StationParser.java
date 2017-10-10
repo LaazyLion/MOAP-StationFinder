@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by matthias on 26.09.17.
@@ -48,27 +49,32 @@ public class StationParser {
             String linesString = jsonProperties.getString("HLINIEN");
 
             // split lines into array
-            ArrayList<String> lineList = new ArrayList<>();
+            HashSet<String> lineSet = new HashSet<>();
 
             linesString = linesString.trim();
 
             for (String s : linesString.split(",")
                     ) {
-                lineList.add(s);
+                s = s.trim();
+                lineSet.add(s);
             }
 
             station.setName(jsonProperties.getString("HTXT"));
             station.setLocation(new PointF((float)jsonCoordinates.getDouble(0), (float)jsonCoordinates.getDouble(1)));
-            station.setLines(lineList);
+            station.setLines(lineSet);
 
-            boolean hasUorS = false;
-
-            for (String s : lineList
+            boolean newStation = true;
+            for (Station s : stationList
                  ) {
-                hasUorS = s.startsWith("U") || s.startsWith("S");
+                if(s.getName().equals(station.getName())) {
+                    s.getLines().addAll(station.getLines());
+                    newStation = false;
+                    break;
+                }
             }
 
-            if(hasUorS) stationList.add(station);
+            if(newStation)
+                stationList.add(station);
         }
 
         return stationList;

@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int STATION_LOADER_ID = 1;
     private static final int STATION_DISTANCE_LOADER_ID = 2;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0;
+    private static final String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
 
     // views
     private RecyclerView rvStationList;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // setup recycler view
         rvStationList = (RecyclerView) findViewById(R.id.activity_main_rv_station_list);
-        stationListAdapter = new RvStationListAdapter();
+        stationListAdapter = new RvStationListAdapter(this);
         linearLayoutManager = new LinearLayoutManager(this);
 
         stationListAdapter.setClickListener(this);
@@ -194,12 +195,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         } else {
             locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
+                    LOCATION_PROVIDER,
                     1000,
                     0, this);
 
-            if(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
-                onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+            if(locationManager.getLastKnownLocation(LOCATION_PROVIDER) != null)
+                onLocationChanged(locationManager.getLastKnownLocation(LOCATION_PROVIDER));
         }
     }
 

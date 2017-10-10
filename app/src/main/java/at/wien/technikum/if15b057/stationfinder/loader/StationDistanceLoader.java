@@ -77,29 +77,4 @@ public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
 
         return stations;
     }
-
-
-    // methods
-
-    private ArrayList<Station> createDummyStations(int count) {
-        ArrayList<Station> stationList = new ArrayList<>();
-
-        for(int i = 0; i < count; i ++) {
-            Station station = new Station();
-            station.setName("Station " + i);
-            station.setLocation(new PointF(i, i));
-
-            ArrayList<String> lineList = new ArrayList<>();
-
-            for(int j = 0; j < 6; j++) {
-                lineList.add("Line " + j);
-            }
-
-            station.setLines(lineList);
-
-            stationList.add(station);
-        }
-
-        return stationList;
-    }
 }

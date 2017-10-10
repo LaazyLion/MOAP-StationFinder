@@ -1,5 +1,7 @@
 package at.wien.technikum.if15b057.stationfinder.adapter;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,14 @@ public class RvStationListAdapter extends RecyclerView.Adapter {
 
     private ArrayList<Station> content;
     private View.OnClickListener clickListener;
+    private Context context;
+
+
+    // constructor
+
+    public RvStationListAdapter(Context context) {
+        this.context = context;
+    }
 
 
     // setter
@@ -54,6 +64,26 @@ public class RvStationListAdapter extends RecyclerView.Adapter {
         String unit = distance > 1000 ? "km" : "m";
         String text = String.valueOf(distance > 1000 ? distance / 1000 : distance) + " " + unit;
         ((ViewHolder)holder).tvDistance.setText(text);
+
+        boolean hassuburban = false;
+        boolean hasunderground = false;
+
+        for (String s : content.get(position).getLines()
+             ) {
+            if(s.startsWith("U"))
+                hasunderground = true;
+
+            if(s.startsWith("S"))
+                hassuburban = true;
+        }
+
+        if(hassuburban && hasunderground)
+            ((ViewHolder)holder).ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.suburbanunderground));
+        else if(hassuburban)
+            ((ViewHolder)holder).ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.suburban));
+        else if(hasunderground)
+            ((ViewHolder)holder).ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.underground));
+
     }
 
     @Override

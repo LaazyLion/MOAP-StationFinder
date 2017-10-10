@@ -20,6 +20,7 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
 
     private final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0;
     private final String LOG_TAG = StationDetailsActivity.class.getName();
+    private static final String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
 
     private Station station;
     private TextView tvLocation;
@@ -157,12 +158,12 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
             }
         } else {
             locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
+                    LOCATION_PROVIDER,
                     1000,
                     0, this);
 
-            if (locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
-                onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+            if (locationManager.getLastKnownLocation(LOCATION_PROVIDER) != null)
+                onLocationChanged(locationManager.getLastKnownLocation(LOCATION_PROVIDER));
         }
     }
 
@@ -175,7 +176,7 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
-            Location stationLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            Location stationLocation = locationManager.getLastKnownLocation(LOCATION_PROVIDER);
             stationLocation.setLatitude(station.getLocation().y);
             stationLocation.setLongitude(station.getLocation().x);
             float distance = stationLocation.distanceTo(location);

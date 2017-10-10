@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by matthias on 26.09.17.
@@ -15,7 +16,7 @@ public class Station implements Parcelable {
     private String name;
     private PointF location;
     private int distance;
-    private ArrayList<String> lines;
+    private HashSet<String> lines;
 
 
     // constructor
@@ -24,14 +25,14 @@ public class Station implements Parcelable {
         name = "";
         location = new PointF(0, 0);
         distance = 0;
-        lines = new ArrayList<>();
+        lines = new HashSet<>();
     }
 
     protected Station(Parcel in) {
         name = in.readString();
         location = in.readParcelable(PointF.class.getClassLoader());
         distance = in.readInt();
-        lines = in.createStringArrayList();
+        lines = new HashSet<>(in.createStringArrayList());
     }
 
     // getter
@@ -48,7 +49,7 @@ public class Station implements Parcelable {
         return distance;
     }
 
-    public ArrayList<String> getLines() {
+    public HashSet<String> getLines() {
         return lines;
     }
 
@@ -58,7 +59,7 @@ public class Station implements Parcelable {
         for (String s : lines
              ) {
             stringBuilder.append(s);
-            stringBuilder.append(", ");
+            stringBuilder.append("\n");
         }
 
         // delete last ", "
@@ -82,7 +83,7 @@ public class Station implements Parcelable {
         this.distance = distance;
     }
 
-    public void setLines(ArrayList<String> lines) {
+    public void setLines(HashSet<String> lines) {
         this.lines = lines;
     }
 
@@ -99,7 +100,9 @@ public class Station implements Parcelable {
         dest.writeString(name);
         dest.writeParcelable(location, flags);
         dest.writeInt(distance);
-        dest.writeStringList(lines);
+        ArrayList<String> buffer = new ArrayList<>();
+        buffer.addAll(lines);
+        dest.writeStringList(buffer);
     }
 
     public static final Creator<Station> CREATOR = new Creator<Station>() {

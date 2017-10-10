@@ -85,43 +85,18 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
                 if(line.startsWith("S"))
                     if(showSTrain) {
                         stationList.add(s);
-                        continue;
+                        break;
                     }
 
                 if(line.startsWith("U"))
                     if(showUTrain) {
                         stationList.add(s);
-                        continue;
+                        break;
                     }
             }
         }
 
         Log.v(LOG_TAG, "Loading done!");
-
-        return stationList;
-    }
-
-
-    // methods
-
-    private ArrayList<Station> createDummyStations(int count) {
-        ArrayList<Station> stationList = new ArrayList<>();
-
-        for(int i = 0; i < count; i ++) {
-            Station station = new Station();
-            station.setName("Station " + i);
-            station.setLocation(new PointF(i, i));
-
-            ArrayList<String> lineList = new ArrayList<>();
-
-            for(int j = 0; j < 6; j++) {
-                lineList.add("Line " + j);
-            }
-
-            station.setLines(lineList);
-
-            stationList.add(station);
-        }
 
         return stationList;
     }
