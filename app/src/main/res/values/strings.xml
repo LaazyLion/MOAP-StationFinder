@@ -1,4 +1,6 @@
 <resources>
+    <string name="google_maps_api_key">AIzaSyAtqQuKnwSqKYWBkB0S2_q5hyUEPDetSUA</string>
+
     <string name="app_name">StationFinder</string>
     <string name="title_menu_main_reload">Aktualisieren</string>
     <string name="title_menu_main_open_settins">Einstellungen</string>

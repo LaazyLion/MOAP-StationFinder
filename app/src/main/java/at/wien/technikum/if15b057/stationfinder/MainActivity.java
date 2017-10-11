@@ -272,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             case STATION_LOADER_ID:
                 if(data != null) stationList = data;
                 stationListFragment.setStations(stationList);
+                mapFragment.setStations(stationList);
                 pbLoading.setVisibility(View.INVISIBLE);
                 break;
 
