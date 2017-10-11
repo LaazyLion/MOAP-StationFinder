@@ -10,9 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
@@ -40,6 +43,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     public void setStations(ArrayList<Station> stations) {
         this.stations = stations;
+        drawMarkers();
     }
 
 
@@ -51,7 +55,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         View root = inflater.inflate(R.layout.fragment_map, container, false);
 
-        mapView = (MapView) root.findViewById(R.id.fragment_map_mapview);
+        mapView = root.findViewById(R.id.fragment_map_mapview);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
@@ -62,8 +66,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
 
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
+            drawMarkers();
+        }
+    }
+
+    private void drawMarkers() {
+        if(map != null) {
+            map.clear();
+
+            if(stations != null) {
+                for (Station s : stations
+                        ) {
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(new LatLng(s.getLocation().y, s.getLocation().x));
+                    markerOptions.title(s.getName());
+                    map.addMarker(markerOptions);
+                }
+            }
         }
     }
 
