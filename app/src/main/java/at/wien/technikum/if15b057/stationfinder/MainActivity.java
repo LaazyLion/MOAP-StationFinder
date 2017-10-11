@@ -9,9 +9,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,11 +28,14 @@ import android.widget.ProgressBar;
 import java.util.ArrayList;
 
 import at.wien.technikum.if15b057.stationfinder.adapter.RvStationListAdapter;
+import at.wien.technikum.if15b057.stationfinder.adapter.TabsCollectionPagerAdapter;
 import at.wien.technikum.if15b057.stationfinder.data.Station;
+import at.wien.technikum.if15b057.stationfinder.fragments.MapFragment;
+import at.wien.technikum.if15b057.stationfinder.fragments.StationListFragment;
 import at.wien.technikum.if15b057.stationfinder.loader.StationDistanceLoader;
 import at.wien.technikum.if15b057.stationfinder.loader.StationListWebLoader;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<ArrayList<Station>>, LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<Station>>, LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String LOG_TAG = MainActivity.class.getName();
     private static final int STATION_LOADER_ID = 1;
@@ -37,22 +43,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0;
     private static final String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
 
-    // views
-    private RecyclerView rvStationList;
-    private RvStationListAdapter stationListAdapter;
-    private LinearLayoutManager linearLayoutManager;
-    private ProgressBar pbLoading;
-
     private LocationManager locationManager;
-
-    // setting
+    private Location lastLocation;
     private SharedPreferences sharedPref;
     private boolean settingShowSTrain;
     private boolean settingShowUTrain;
-
-    // data
     private String url;
     private ArrayList<Station> stationList;
+    private ActionBar actionBar;
+    private TabsCollectionPagerAdapter tabsCollectionPagerAdapter;
+    private ViewPager vpTabs;
+    private StationListFragment stationListFragment;
+    private MapFragment mapFragment;
+    private ProgressBar pbLoading;
 
 
     // lifecycle methods
@@ -70,29 +73,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         settingShowUTrain = sharedPref.getBoolean(getString(R.string.settings_u_train_visible_key), true);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
-
         // get url
         url = getString(R.string.oeff_station_json_url);
 
-        // setup recycler view
-        rvStationList = (RecyclerView) findViewById(R.id.activity_main_rv_station_list);
-        stationListAdapter = new RvStationListAdapter(this);
-        linearLayoutManager = new LinearLayoutManager(this);
+        // setup views
+        stationListFragment = new StationListFragment();
+        mapFragment = new MapFragment();
+        tabsCollectionPagerAdapter = new TabsCollectionPagerAdapter(getSupportFragmentManager());
+        tabsCollectionPagerAdapter.addContent(stationListFragment);
+        tabsCollectionPagerAdapter.addContent(mapFragment);
+        vpTabs = (ViewPager) findViewById(R.id.activity_main_vp_tabs);
+        vpTabs.setAdapter(tabsCollectionPagerAdapter);
+        actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+            @Override
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+                vpTabs.setCurrentItem(tab.getPosition());
+            }
 
-        stationListAdapter.setClickListener(this);
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
 
-        rvStationList.setAdapter(stationListAdapter);
-        rvStationList.setLayoutManager(linearLayoutManager);
+            }
 
-        // setup other views
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+        };
+        actionBar.addTab(actionBar.newTab().setText("Liste").setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().setText("Map").setTabListener(tabListener));
+        vpTabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                getSupportActionBar().setSelectedNavigationItem(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         pbLoading = (ProgressBar) findViewById(R.id.activity_main_pb_loading);
+        pbLoading.setVisibility(View.INVISIBLE);
 
         // bind loader
-        Bundle args = new Bundle();
-        args.putString("url", url);
-        args.putBoolean("showstrain", settingShowSTrain);
-        args.putBoolean("showutrain", settingShowUTrain);
-        getSupportLoaderManager().initLoader(STATION_LOADER_ID, args, this);
+        startLoader(STATION_LOADER_ID, false);
 
         requestLocationUpdates();
     }
@@ -115,17 +147,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    // click methods
+    // methods
 
-    @Override
-    public void onClick(View v) {
-        int index = rvStationList.getChildAdapterPosition(v);
-        Intent intent = new Intent(this, StationDetailsActivity.class);
-        Bundle bundle = new Bundle();
+    private void startLoader(int loaderID, boolean restart) {
+        Bundle args = new Bundle();
 
-        bundle.putParcelable("station", stationList.get(index));
-        intent.putExtras(bundle);
-        startActivity(intent);
+
+        switch (loaderID) {
+            case STATION_LOADER_ID:
+                args.putString("url", url);
+                args.putBoolean("showstrain", settingShowSTrain);
+                args.putBoolean("showutrain", settingShowUTrain);
+                pbLoading.setVisibility(View.VISIBLE);
+                break;
+
+            case STATION_DISTANCE_LOADER_ID:
+                args.putParcelable("location", lastLocation);
+                break;
+        }
+
+        if (getSupportLoaderManager().getLoader(loaderID) == null && !restart)
+            getSupportLoaderManager().initLoader(loaderID, args, this);
+        else
+            getSupportLoaderManager().restartLoader(loaderID, args, this);
+
     }
 
 
@@ -143,20 +188,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (itemId) {
             case R.id.menu_main_action_reload:
-                stationListAdapter.setContent(null);
-                pbLoading.setVisibility(View.VISIBLE);
-
-                Bundle args = new Bundle();
-
-                args.putString("url", url);
-                args.putBoolean("showstrain", settingShowSTrain);
-                args.putBoolean("showutrain", settingShowUTrain);
-
-                if (getSupportLoaderManager().getLoader(STATION_LOADER_ID) == null)
-                    getSupportLoaderManager().initLoader(STATION_LOADER_ID, args, this);
-                else
-                    getSupportLoaderManager().restartLoader(STATION_LOADER_ID, args, this);
-
+                startLoader(STATION_LOADER_ID, true);
                 return true;
 
             case R.id.menu_main_action_open_settings:
@@ -174,25 +206,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void requestLocationUpdates() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_FINE_LOCATION);
-            }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_FINE_LOCATION);
         } else {
             locationManager.requestLocationUpdates(
                     LOCATION_PROVIDER,
@@ -210,18 +227,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onLocationChanged(Location location) {
         Log.v(LOG_TAG, "Location changed: " + location.toString());
-
-        if (stationList != null) {
-            pbLoading.setVisibility(View.VISIBLE);
-
-            Bundle args = new Bundle();
-            args.putParcelable("location", location);
-
-            if (getSupportLoaderManager().getLoader(STATION_DISTANCE_LOADER_ID) == null)
-                getSupportLoaderManager().initLoader(STATION_DISTANCE_LOADER_ID, args, this);
-            else
-                getSupportLoaderManager().restartLoader(STATION_DISTANCE_LOADER_ID, args, this);
-        }
+        lastLocation = location;
+        startLoader(STATION_DISTANCE_LOADER_ID, false);
     }
 
     @Override
@@ -264,14 +271,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case STATION_LOADER_ID:
                 if(data != null) stationList = data;
-                stationListAdapter.setContent(data);
-                pbLoading.setVisibility(View.GONE);
+                stationListFragment.setStations(stationList);
+                pbLoading.setVisibility(View.INVISIBLE);
                 break;
 
             case STATION_DISTANCE_LOADER_ID:
                 if(data != null) stationList = data;
-                stationListAdapter.setContent(stationList);
-                pbLoading.setVisibility(View.GONE);
+                stationListFragment.setStations(stationList);
                 break;
         }
     }
@@ -311,17 +317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             settingShowSTrain = sharedPref.getBoolean(getString(R.string.settings_s_train_visible_key), true);
             settingShowUTrain = sharedPref.getBoolean(getString(R.string.settings_u_train_visible_key), true);
 
-            stationListAdapter.setContent(null);
-            pbLoading.setVisibility(View.VISIBLE);
-
-            Bundle args = new Bundle();
-
-            args.putString("url", url);
-            args.putBoolean("showstrain", settingShowSTrain);
-            args.putBoolean("showutrain", settingShowUTrain);
-
-            getSupportLoaderManager().restartLoader(STATION_LOADER_ID, args, this);
-
+            startLoader(STATION_LOADER_ID, true);
         }
     }
 }
