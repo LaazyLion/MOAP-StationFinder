@@ -62,9 +62,6 @@ public class Station implements Parcelable {
             stringBuilder.append("\n");
         }
 
-        // delete last ", "
-        stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
-
         return stringBuilder.toString();
     }
 

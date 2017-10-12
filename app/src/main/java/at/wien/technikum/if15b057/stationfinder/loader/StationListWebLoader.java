@@ -61,39 +61,19 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
 
         Log.v(LOG_TAG, "Started loading...");
 
-        ArrayList<Station> buffer = new ArrayList<>();
         ArrayList<Station> stationList = new ArrayList<>();
 
         try {
             connection = (HttpURLConnection) url.openConnection();
-            buffer = StationParser.fromStream(connection.getInputStream());
+            stationList = StationParser.fromStream(connection.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
-            buffer = new ArrayList<>();
+            stationList = new ArrayList<>();
         } catch (JSONException e) {
             e.printStackTrace();
         } finally {
             if(connection != null)
                 connection.disconnect();
-        }
-
-        // show only selected stations
-        for (Station s : buffer
-             ) {
-            for (String line : s.getLines()
-                 ) {
-                if(line.startsWith("S"))
-                    if(showSTrain) {
-                        stationList.add(s);
-                        break;
-                    }
-
-                if(line.startsWith("U"))
-                    if(showUTrain) {
-                        stationList.add(s);
-                        break;
-                    }
-            }
         }
 
         Log.v(LOG_TAG, "Loading done!");

@@ -92,7 +92,7 @@
 
             <TextView
                 android:id="@+id/activity_station_details_tv_lines"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
