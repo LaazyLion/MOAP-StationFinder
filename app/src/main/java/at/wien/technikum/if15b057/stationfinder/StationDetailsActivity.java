@@ -14,9 +14,16 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import at.wien.technikum.if15b057.stationfinder.data.Station;
 
-public class StationDetailsActivity extends AppCompatActivity implements LocationListener {
+public class StationDetailsActivity extends AppCompatActivity implements LocationListener, OnMapReadyCallback {
 
     private final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0;
     private final String LOG_TAG = StationDetailsActivity.class.getName();
@@ -26,6 +33,8 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
     private TextView tvLocation;
     private TextView tvLines;
     private TextView tvDistance;
+    private MapView mapView;
+    private GoogleMap map;
 
     private LocationManager locationManager;
 
@@ -53,6 +62,9 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
         tvLocation = (TextView) findViewById(R.id.activity_station_details_tv_location);
         tvLines = (TextView) findViewById(R.id.activity_station_details_tv_lines);
         tvDistance = (TextView) findViewById(R.id.activity_station_details_tv_myLocation);
+        mapView = (MapView) findViewById(R.id.activity_station_details_mapview);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
 
         // set content
         setTitle(station.getName());
@@ -64,15 +76,63 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        locationManager.removeUpdates(this);
+    public void onStart() {
+        super.onStart();
+        mapView.onStart();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
+        mapView.onResume();
         requestLocationUpdates();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+        mapView.onPause();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mapView.onStop();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+
+    // google maps
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        this.map = googleMap;
+
+        map.clear();
+        LatLng position = new LatLng(station.getLocation().y, station.getLocation().x);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(position);
+        map.addMarker(markerOptions);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 17));
+        map.getUiSettings().setAllGesturesEnabled(false);
     }
 
 

@@ -6,7 +6,7 @@
 
 
     <com.google.android.gms.maps.MapView
-        android:id="@+id/fragment_map_mapview"
+        android:id="@+id/activity_station_details_mapview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible" />

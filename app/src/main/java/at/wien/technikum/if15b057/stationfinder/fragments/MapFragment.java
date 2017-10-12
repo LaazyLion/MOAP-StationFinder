@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -55,7 +54,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         View root = inflater.inflate(R.layout.fragment_map, container, false);
 
-        mapView = root.findViewById(R.id.fragment_map_mapview);
+        mapView = root.findViewById(R.id.activity_station_details_mapview);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
