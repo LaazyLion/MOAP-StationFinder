@@ -12,7 +12,7 @@
     <string name="oeff_station_json_url">https://data.wien.gv.at/daten/geo?service=WFS&amp;request=GetFeature&amp;version=1.1.0&amp;typeName=ogdwien:OEFFHALTESTOGD&amp;srsName=EPSG:4326&amp;outputFormat=json</string>
     -->
 
-    <string name="oeff_station_json_url">http://10.202.241.118:8082/OEFFHALTESTOGD.json</string>
+    <string name="oeff_station_json_url">http://192.168.0.12:8082/OEFFHALTESTOGD.json</string>
 
 
     <string name="settings_s_train_visible_key" translatable="false">settings_s_train_visible</string>

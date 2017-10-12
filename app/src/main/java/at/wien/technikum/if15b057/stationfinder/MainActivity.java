@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int STATION_LOADER_ID = 1;
     private static final int STATION_DISTANCE_LOADER_ID = 2;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0;
-    private static final String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
+    private static final String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
 
     private LocationManager locationManager;
     private Location lastLocation;
