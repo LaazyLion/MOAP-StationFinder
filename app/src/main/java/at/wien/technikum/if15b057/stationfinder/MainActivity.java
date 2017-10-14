@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import at.wien.technikum.if15b057.stationfinder.adapter.RvStationListAdapter;
 import at.wien.technikum.if15b057.stationfinder.adapter.TabsCollectionPagerAdapter;
@@ -35,7 +36,7 @@ import at.wien.technikum.if15b057.stationfinder.fragments.StationListFragment;
 import at.wien.technikum.if15b057.stationfinder.loader.StationDistanceLoader;
 import at.wien.technikum.if15b057.stationfinder.loader.StationListWebLoader;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<Station>>, LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Station>>, LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String LOG_TAG = MainActivity.class.getName();
     private static final int STATION_LOADER_ID = 1;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private boolean settingShowSTrain;
     private boolean settingShowUTrain;
     private String url;
-    private ArrayList<Station> stationList;
+    private List<Station> stationList;
     private ActionBar actionBar;
     private TabsCollectionPagerAdapter tabsCollectionPagerAdapter;
     private ViewPager vpTabs;
@@ -250,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     // loader
 
     @Override
-    public Loader<ArrayList<Station>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<Station>> onCreateLoader(int id, Bundle args) {
         Log.v(LOG_TAG, "Loader created: " + id);
 
         if(id == STATION_LOADER_ID)
@@ -265,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoadFinished(Loader<ArrayList<Station>> loader, ArrayList<Station> data) {
+    public void onLoadFinished(Loader<List<Station>> loader, List<Station> data) {
 
         switch (loader.getId()) {
 
@@ -283,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoaderReset(Loader<ArrayList<Station>> loader) {
+    public void onLoaderReset(Loader<List<Station>> loader) {
     }
 
 

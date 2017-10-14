@@ -7,15 +7,13 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-/**
- * Created by matthias on 26.09.17.
- */
-
 public class Station implements Parcelable {
 
     private String name;
     private PointF location;
     private int distance;
+    private boolean containingUnderground;
+    private boolean containingSTrain;
     private HashSet<String> lines;
 
 
@@ -26,6 +24,8 @@ public class Station implements Parcelable {
         location = new PointF(0, 0);
         distance = 0;
         lines = new HashSet<>();
+        containingUnderground = false;
+        containingSTrain = false;
     }
 
     protected Station(Parcel in) {
@@ -33,6 +33,9 @@ public class Station implements Parcelable {
         location = in.readParcelable(PointF.class.getClassLoader());
         distance = in.readInt();
         lines = new HashSet<>(in.createStringArrayList());
+        boolean[] booleanArray = in.createBooleanArray();
+        containingUnderground = booleanArray[0];
+        containingSTrain = booleanArray[1];
     }
 
     // getter
@@ -65,6 +68,14 @@ public class Station implements Parcelable {
         return stringBuilder.toString();
     }
 
+    public boolean isContainingUnderground() {
+        return containingUnderground;
+    }
+
+    public boolean isContainingSTrain() {
+        return containingSTrain;
+    }
+
 
     // setter
 
@@ -84,6 +95,13 @@ public class Station implements Parcelable {
         this.lines = lines;
     }
 
+    public void setContainingUnderground(boolean containingUnderground) {
+        this.containingUnderground = containingUnderground;
+    }
+
+    public void setContainingSTrain(boolean containingSTrain) {
+        this.containingSTrain = containingSTrain;
+    }
 
     // parcelable methods
 
@@ -100,6 +118,10 @@ public class Station implements Parcelable {
         ArrayList<String> buffer = new ArrayList<>();
         buffer.addAll(lines);
         dest.writeStringList(buffer);
+        boolean[] booleanArray = new boolean[2];
+        booleanArray[0] = containingUnderground;
+        booleanArray[1] = containingSTrain;
+        dest.writeBooleanArray(booleanArray);
     }
 
     public static final Creator<Station> CREATOR = new Creator<Station>() {

@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import at.wien.technikum.if15b057.stationfinder.R;
 import at.wien.technikum.if15b057.stationfinder.StationDetailsActivity;
@@ -26,7 +27,7 @@ public class StationListFragment extends Fragment implements View.OnClickListene
     private RecyclerView rvStationList;
     private RvStationListAdapter stationListAdapter;
     private LinearLayoutManager linearLayoutManager;
-    private ArrayList<Station> stations;
+    private List<Station> stations;
 
 
     // constructor
@@ -38,7 +39,7 @@ public class StationListFragment extends Fragment implements View.OnClickListene
 
     // setter
 
-    public void setStations(ArrayList<Station> stations) {
+    public void setStations(List<Station> stations) {
         this.stations = stations;
         if(stationListAdapter != null)
             stationListAdapter.setContent(stations);

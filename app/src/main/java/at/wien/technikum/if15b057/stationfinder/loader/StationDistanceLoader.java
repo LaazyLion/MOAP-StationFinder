@@ -11,6 +11,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import at.wien.technikum.if15b057.stationfinder.data.Station;
 
@@ -18,11 +19,11 @@ import at.wien.technikum.if15b057.stationfinder.data.Station;
  * Created by matthias on 26.09.17.
  */
 
-public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
+public class StationDistanceLoader extends AsyncTaskLoader<List<Station>> {
 
     private static final String LOG_TAG = StationDistanceLoader.class.getName();
     private Location location;
-    private ArrayList<Station> stations;
+    private List<Station> stations;
 
 
     // constructor
@@ -35,7 +36,7 @@ public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
 
     // setter
 
-    public void setStations(ArrayList<Station> stations) {
+    public void setStations(List<Station> stations) {
         this.stations = stations;
     }
 
@@ -49,7 +50,7 @@ public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
     }
 
     @Override
-    public ArrayList<Station> loadInBackground() {
+    public List<Station> loadInBackground() {
 
         Log.v(LOG_TAG, "Started sorting...");
 
@@ -66,12 +67,7 @@ public class StationDistanceLoader extends AsyncTaskLoader<ArrayList<Station>> {
         // api 24 required
         // stations.sort(Comparator.comparing(Station::getDistance));
 
-        Collections.sort(stations, new Comparator<Station>() {
-            @Override
-            public int compare(Station s1, Station s2) {
-                return (s1.getDistance() - s2.getDistance());
-            }
-        });
+        Collections.sort(stations, (s1, s2) -> (s1.getDistance() - s2.getDistance()));
 
         Log.v(LOG_TAG, "Sorting done!");
 
