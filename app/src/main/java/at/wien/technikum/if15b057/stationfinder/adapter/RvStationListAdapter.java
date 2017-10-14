@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import at.wien.technikum.if15b057.stationfinder.R;
 import at.wien.technikum.if15b057.stationfinder.data.Station;
@@ -20,7 +21,7 @@ import at.wien.technikum.if15b057.stationfinder.data.Station;
 
 public class RvStationListAdapter extends RecyclerView.Adapter {
 
-    private ArrayList<Station> content;
+    private List<Station> content;
     private View.OnClickListener clickListener;
     private Context context;
 
@@ -34,7 +35,7 @@ public class RvStationListAdapter extends RecyclerView.Adapter {
 
     // setter
 
-    public void setContent(ArrayList<Station> content) {
+    public void setContent(List<Station> content) {
         this.content = content;
         notifyDataSetChanged();
     }
@@ -105,9 +106,9 @@ public class RvStationListAdapter extends RecyclerView.Adapter {
 
         ViewHolder(View itemView) {
             super(itemView);
-            tvName = (TextView) itemView.findViewById(R.id.content_station_list_tv_name);
-            tvDistance = (TextView) itemView.findViewById(R.id.content_station_list_tv_distance);
-            ivIcon = (ImageView) itemView.findViewById(R.id.content_station_list_iv_icon);
+            tvName = itemView.findViewById(R.id.content_station_list_tv_name);
+            tvDistance = itemView.findViewById(R.id.content_station_list_tv_distance);
+            ivIcon = itemView.findViewById(R.id.content_station_list_iv_icon);
         }
     }
 }

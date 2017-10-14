@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by matthias on 26.09.17.
@@ -26,7 +27,7 @@ public class StationParser {
 
     private static final String LOG_TAG = StationParser.class.getName();
 
-    public static ArrayList<Station> fromStream(InputStream inputStream) throws IOException, JSONException {
+    public static List<Station> fromStream(InputStream inputStream) throws IOException, JSONException {
 
         Log.v(LOG_TAG, "Loading from Stream...");
         JSONObject jsonObject = new JSONObject(IOUtils.toString(inputStream));
@@ -34,7 +35,7 @@ public class StationParser {
         return fromJson(jsonObject);
     }
 
-    public static ArrayList<Station> fromJson(JSONObject jsonRoot) throws JSONException {
+    public static List<Station> fromJson(JSONObject jsonRoot) throws JSONException {
 
         int totalFeatures = jsonRoot.getInt("totalFeatures");
         Integer divaID;
@@ -65,18 +66,20 @@ public class StationParser {
 
             linesString = linesString.trim();
 
-            boolean containsUorS = false;
+            boolean containsUnderground = false;
+            boolean containsSTrain = false;
             for (String s : linesString.split(",")
                     ) {
                 s = s.trim();
                 lineSet.add(s);
-                if(s.startsWith("U") || s.startsWith("S")) {
-                    containsUorS = true;
+                if(s.startsWith("U")) {
+                    containsUnderground = true;
+                } else if(s.startsWith("S")) {
+                    containsSTrain = true;
                 }
             }
 
-            if(!containsUorS) continue;
-
+            if(!containsUnderground && !containsSTrain) continue;
 
             // add to list
             if(divaID != null)
@@ -89,6 +92,8 @@ public class StationParser {
                 station.setName(jsonProperties.getString("HTXT"));
                 station.setLocation(new PointF((float) jsonCoordinates.getDouble(0), (float) jsonCoordinates.getDouble(1)));
                 station.setLines(lineSet);
+                station.setContainingUnderground(containsUnderground);
+                station.setContainingSTrain(containsSTrain);
                 if(divaID != null)
                     buffer.put(divaID, station);
             } else {

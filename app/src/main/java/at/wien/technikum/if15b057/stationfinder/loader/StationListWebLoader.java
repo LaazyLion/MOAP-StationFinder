@@ -15,6 +15,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.function.Predicate;
 
 import at.wien.technikum.if15b057.stationfinder.data.Station;
 import at.wien.technikum.if15b057.stationfinder.data.StationParser;
@@ -23,7 +25,7 @@ import at.wien.technikum.if15b057.stationfinder.data.StationParser;
  * Created by matthias on 26.09.17.
  */
 
-public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
+public class StationListWebLoader extends AsyncTaskLoader<List<Station>> {
 
     private static final String LOG_TAG = StationListWebLoader.class.getName();
     private URL url;
@@ -57,11 +59,11 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
     }
 
     @Override
-    public ArrayList<Station> loadInBackground() {
+    public List<Station> loadInBackground() {
 
         Log.v(LOG_TAG, "Started loading...");
 
-        ArrayList<Station> stationList = new ArrayList<>();
+        List<Station> stationList = new ArrayList<>();
 
         try {
             connection = (HttpURLConnection) url.openConnection();
@@ -74,6 +76,12 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
         } finally {
             if(connection != null)
                 connection.disconnect();
+        }
+
+        try {
+            stationList.removeIf(station -> (!station.isContainingUnderground() && !station.isContainingSTrain()));
+        } catch (NoClassDefFoundError ex) {
+            ex.printStackTrace();
         }
 
         Log.v(LOG_TAG, "Loading done!");
