@@ -68,7 +68,7 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
 
         // set content
         setTitle(station.getName());
-        tvLocation.setText(station.getLocation().toString());
+        tvLocation.setText(station.getLocationAsString());
         tvLines.setText(station.getLinesAsString());
         tvDistance.setText(String.valueOf(station.getDistance()));
 

@@ -48,6 +48,10 @@ public class Station implements Parcelable {
         return location;
     }
 
+    public String getLocationAsString() {
+        return "Longitude:\n  " + getLocation().x + "\nLatitude:\n  " + getLocation().y;
+    }
+
     public int getDistance() {
         return distance;
     }
