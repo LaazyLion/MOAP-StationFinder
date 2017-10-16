@@ -60,30 +60,27 @@ public class RvStationListAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((ViewHolder)holder).tvName.setText(content.get(position).getName());
-        int distance = content.get(position).getDistance();
-        String unit = distance > 1000 ? "km" : "m";
-        String text = String.valueOf(distance > 1000 ? distance / 1000 : distance) + " " + unit;
-        ((ViewHolder)holder).tvDistance.setText(text);
+        ViewHolder viewHolder = (ViewHolder) holder;
+        Station station = content.get(position);
+        viewHolder.tvName.setText(station.getName());
 
-        boolean hassuburban = false;
-        boolean hasunderground = false;
+        int distance = station.getDistance();
 
-        for (String s : content.get(position).getLines()
-             ) {
-            if(s.startsWith("U"))
-                hasunderground = true;
-
-            if(s.startsWith("S"))
-                hassuburban = true;
+        if(distance != 0) {
+            String unit = distance > 1000 ? "km" : "m";
+            String text = String.valueOf(distance > 1000 ? distance / 1000 : distance) + " " + unit;
+            viewHolder.tvDistance.setVisibility(View.VISIBLE);
+            viewHolder.tvDistance.setText(text);
+        } else {
+            viewHolder.tvDistance.setVisibility(View.INVISIBLE);
         }
 
-        if(hassuburban && hasunderground)
-            ((ViewHolder)holder).ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.suburbanunderground));
-        else if(hassuburban)
-            ((ViewHolder)holder).ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.suburban));
-        else if(hasunderground)
-            ((ViewHolder)holder).ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.underground));
+        if(station.isContainingUnderground() && station.isContainingSTrain())
+            viewHolder.ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.suburbanunderground));
+        else if(station.isContainingSTrain())
+            viewHolder.ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.suburban));
+        else if(station.isContainingUnderground())
+            viewHolder.ivIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.underground));
 
     }
 

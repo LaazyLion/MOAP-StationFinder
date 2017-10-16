@@ -6,7 +6,6 @@
     <string name="title_menu_main_open_settins">Einstellungen</string>
 
     <string name="label_location">Standort</string>
-    <string name="label_my_loction">Mein Standort</string>
     <string name="label_distance">Entfernung</string>
     <string name="label_lines">Linien</string>
 
@@ -24,6 +23,4 @@
     <string name="settings_u_train_summary">Zeigt die U-Bahn Stationen in der Liste an</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_demo">Map</string>
 </resources>
