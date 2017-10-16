@@ -1,13 +1,26 @@
 <resources>
+    <string name="google_maps_api_key">AIzaSyAtqQuKnwSqKYWBkB0S2_q5hyUEPDetSUA</string>
+
     <string name="app_name">StationFinder</string>
     <string name="title_menu_main_reload">Aktualisieren</string>
+    <string name="title_menu_main_open_settins">Einstellungen</string>
+
+    <string name="label_location">Standort</string>
+    <string name="label_distance">Entfernung</string>
+    <string name="label_lines">Linien</string>
+
+
     <string name="oeff_station_json_url">https://data.wien.gv.at/daten/geo?service=WFS&amp;request=GetFeature&amp;version=1.1.0&amp;typeName=ogdwien:OEFFHALTESTOGD&amp;srsName=EPSG:4326&amp;outputFormat=json</string>
-    <!-- TEST URL
-    <string name="oeff_station_json_url">http://10.0.0.4:80/OEFFHALTESTOGD.json</string>
-    -->
-    
-    <string name="settings_output_visible_key" translatable="false">output_visible</string>
-    <stings name="settings_output_visible_summary_on">It is on.</stings>
-    <string name="settings_output_visible_summary_off">Oh no its of</string>
-    <string name="settings_"
+    <!--<string name="oeff_station_json_url">http://10.0.0.4:8082/OEFFHALTESTOGD.json</string>-->
+
+
+    <string name="settings_s_train_visible_key" translatable="false">settings_s_train_visible</string>
+    <string name="settings_s_train_title">S-Bahn anzeigen</string>
+    <string name="settings_s_train_summary">Zeigt die S-Bahn Stationen in der Liste an</string>
+
+    <string name="settings_u_train_visible_key" translatable="false">settings_u_train_visible</string>
+    <string name="settings_u_train_title">U-Bahn anzeigen</string>
+    <string name="settings_u_train_summary">Zeigt die U-Bahn Stationen in der Liste an</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
 </resources>

@@ -13,6 +13,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Predicate;
 
 import at.wien.technikum.if15b057.stationfinder.data.Station;
 import at.wien.technikum.if15b057.stationfinder.data.StationParser;
@@ -21,10 +25,12 @@ import at.wien.technikum.if15b057.stationfinder.data.StationParser;
  * Created by matthias on 26.09.17.
  */
 
-public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
+public class StationListWebLoader extends AsyncTaskLoader<List<Station>> {
 
-    private static final String TAG = StationListWebLoader.class.getName();
+    private static final String LOG_TAG = StationListWebLoader.class.getName();
     private URL url;
+    private boolean showSTrain;
+    private boolean showUTrain;
     private HttpURLConnection connection;
 
 
@@ -38,6 +44,9 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
+        showSTrain = args.getBoolean("showstrain");
+        showUTrain = args.getBoolean("showutrain");
     }
 
 
@@ -50,11 +59,11 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
     }
 
     @Override
-    public ArrayList<Station> loadInBackground() {
+    public List<Station> loadInBackground() {
 
-        Log.v(TAG, "Started loading...");
+        Log.v(LOG_TAG, "Started loading...");
 
-        ArrayList<Station> stationList = new ArrayList<>();
+        List<Station> stationList = new ArrayList<>();
 
         try {
             connection = (HttpURLConnection) url.openConnection();
@@ -69,32 +78,13 @@ public class StationListWebLoader extends AsyncTaskLoader<ArrayList<Station>> {
                 connection.disconnect();
         }
 
-        Log.v(TAG, "Loading done!");
-
-        return stationList;
-    }
-
-
-    // methods
-
-    private ArrayList<Station> createDummyStations(int count) {
-        ArrayList<Station> stationList = new ArrayList<>();
-
-        for(int i = 0; i < count; i ++) {
-            Station station = new Station();
-            station.setName("Station " + i);
-            station.setLocation(new PointF(i, i));
-
-            ArrayList<String> lineList = new ArrayList<>();
-
-            for(int j = 0; j < 6; j++) {
-                lineList.add("Line " + j);
-            }
-
-            station.setLines(lineList);
-
-            stationList.add(station);
+        try {
+            stationList.removeIf(station -> (!station.isContainingUnderground() && !station.isContainingSTrain()));
+        } catch (NoClassDefFoundError ex) {
+            ex.printStackTrace();
         }
+
+        Log.v(LOG_TAG, "Loading done!");
 
         return stationList;
     }
