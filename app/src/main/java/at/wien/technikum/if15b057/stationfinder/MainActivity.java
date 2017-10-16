@@ -17,18 +17,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import at.wien.technikum.if15b057.stationfinder.adapter.RvStationListAdapter;
 import at.wien.technikum.if15b057.stationfinder.adapter.TabsCollectionPagerAdapter;
 import at.wien.technikum.if15b057.stationfinder.data.Station;
 import at.wien.technikum.if15b057.stationfinder.fragments.MapFragment;

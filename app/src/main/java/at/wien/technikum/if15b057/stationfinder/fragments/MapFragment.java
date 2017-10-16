@@ -11,12 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import at.wien.technikum.if15b057.stationfinder.R;
 import at.wien.technikum.if15b057.stationfinder.data.Station;
@@ -26,8 +26,8 @@ import at.wien.technikum.if15b057.stationfinder.data.Station;
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
-    private ArrayList<Station> stations;
-    private MapView mapView;
+    private List<Station> stations;
+    private SupportMapFragment mapFragment;
     private GoogleMap map;
 
 
@@ -40,7 +40,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     // setter
 
-    public void setStations(ArrayList<Station> stations) {
+    public void setStations(List<Station> stations) {
         this.stations = stations;
         drawMarkers();
     }
@@ -54,9 +54,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         View root = inflater.inflate(R.layout.fragment_map, container, false);
 
-        mapView = root.findViewById(R.id.activity_station_details_mapview);
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.fragment_map_mapfragment);
+        mapFragment.getMapAsync(this);
 
         return root;
     }
@@ -85,47 +84,5 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mapView.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mapView.onStop();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mapView.onLowMemory();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
     }
 }

@@ -18,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -33,7 +34,7 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
     private TextView tvLocation;
     private TextView tvLines;
     private TextView tvDistance;
-    private MapView mapView;
+    private SupportMapFragment mapFragment;
     private GoogleMap map;
 
     private LocationManager locationManager;
@@ -62,9 +63,8 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
         tvLocation = (TextView) findViewById(R.id.activity_station_details_tv_location);
         tvLines = (TextView) findViewById(R.id.activity_station_details_tv_lines);
         tvDistance = (TextView) findViewById(R.id.activity_station_details_tv_myLocation);
-        mapView = (MapView) findViewById(R.id.activity_station_details_mapview);
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.activity_station_details_mapfragment);
+        mapFragment.getMapAsync(this);
 
         // set content
         setTitle(station.getName());
@@ -76,15 +76,8 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        mapView.onStart();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
-        mapView.onResume();
         requestLocationUpdates();
     }
 
@@ -92,31 +85,6 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
     public void onPause() {
         super.onPause();
         locationManager.removeUpdates(this);
-        mapView.onPause();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mapView.onStop();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mapView.onLowMemory();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
     }
 
 
@@ -133,6 +101,9 @@ public class StationDetailsActivity extends AppCompatActivity implements Locatio
         map.addMarker(markerOptions);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 17));
         map.getUiSettings().setAllGesturesEnabled(false);
+        map.getUiSettings().setZoomGesturesEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map.setMinZoomPreference(14);
     }
 
 
